@@ -1,59 +1,64 @@
-# AfterContentInit
+ngAfterContentInit
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.4.
+ngAfterContentInit is a lifecycle hook in Angular that's used within component classes to act after Angular has projected external content into the component's view using content projection (<ng-content>).
 
-## Development server
+🔹 When is ngAfterContentInit Called?
+It is called once after Angular has fully initialized all content projected into the component via <ng-content>. It's part of the AfterContentInit lifecycle interface.
 
-To start a local development server, run:
+You typically use ngAfterContentInit to interact with or modify projected content, like accessing content children using @ContentChild() or @ContentChildren().
 
-```bash
-ng serve
-```
+@ContentChildren allows a component to query multiple projected child elements or directives (i.e., those passed using <ng-content> from a parent component).
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+You typically use it with QueryList to interact with multiple elements or directives projected into the component.
 
-## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+app.component.html
 
-```bash
-ng generate component component-name
-```
+<app-child>
+  <p #projectedContent>This is projected content</p>
+</app-child>
+<div card-header>
+  <app-child>
+    <li #item>Item 1</li>
+    <li #item>Item 2</li>
+    <li #item>Item 3</li>
+  </app-child>
+</div>
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-```bash
-ng generate --help
-```
+child.component.html
 
-## Building
+<p>child works!</p>
+<ng-content></ng-content>
 
-To build the project run:
 
-```bash
-ng build
-```
+child.component.ts
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+import {
+  AfterContentInit,
+  Component,
+  ContentChild,
+  ContentChildren,
+  ElementRef,
+  QueryList,
+} from '@angular/core';
 
-## Running unit tests
+@Component({
+  selector: 'app-child',
+  standalone: false,
+  templateUrl: './child.component.html',
+  styleUrl: './child.component.css',
+})
+export class ChildComponent implements AfterContentInit {
+  @ContentChild('projectedContent') content!: ElementRef;
+  @ContentChildren('item') items!: QueryList<ElementRef>;
+  ngAfterContentInit(): void {
+    if (this.content) {
+      console.log('Content:', this.content.nativeElement.textContent);
+    }
+    this.items.forEach((item, index) => {
+      console.log(`Item ${index + 1}:`, item.nativeElement.textContent);
+    });
+  }
+}
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
